@@ -162,7 +162,7 @@ public class ScrollManager {
                 item.setAmount(item.getAmount() - 1);
             } else {
                 // 메인핸드에 있는 아이템 제거
-                player.getInventory().setItemInMainHand(null);
+                player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
             }
         }
         // 다회용(UNLIMITED)은 소모하지 않음
