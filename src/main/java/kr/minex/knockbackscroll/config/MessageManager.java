@@ -44,11 +44,15 @@ public class MessageManager {
         messages = YamlConfiguration.loadConfiguration(messagesFile);
 
         // 기본값과 병합 (새로운 키 추가 대응)
-        InputStream defaultStream = plugin.getResource("messages.yml");
-        if (defaultStream != null) {
-            YamlConfiguration defaultMessages = YamlConfiguration.loadConfiguration(
-                    new InputStreamReader(defaultStream, StandardCharsets.UTF_8));
-            messages.setDefaults(defaultMessages);
+        try (InputStream defaultStream = plugin.getResource("messages.yml")) {
+            if (defaultStream != null) {
+                YamlConfiguration defaultMessages = YamlConfiguration.loadConfiguration(
+                        new InputStreamReader(defaultStream, StandardCharsets.UTF_8));
+                messages.setDefaults(defaultMessages);
+                messages.options().copyDefaults(true);
+            }
+        } catch (Exception e) {
+            plugin.getLogger().warning("기본 messages.yml 로드 중 오류 발생: " + e.getMessage());
         }
 
         // 접두사 캐싱

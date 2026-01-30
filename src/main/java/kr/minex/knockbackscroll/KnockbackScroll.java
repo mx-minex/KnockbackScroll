@@ -17,7 +17,7 @@ import kr.minex.knockbackscroll.managers.ScrollManager;
  * 넉백저항 주문서 플러그인 메인 클래스
  * 플러그인의 생명주기를 관리하고 각 컴포넌트를 초기화합니다.
  */
-public final class KnockbackScroll extends JavaPlugin {
+public class KnockbackScroll extends JavaPlugin {
 
     private static KnockbackScroll instance;
 
@@ -58,6 +58,7 @@ public final class KnockbackScroll extends JavaPlugin {
         // 6. 리로드 감지 - 이미 접속 중인 플레이어 처리
         if (Bukkit.getOnlinePlayers().size() > 0) {
             getLogger().info("플러그인 리로드 감지됨. 기존 플레이어 데이터는 초기화됩니다.");
+            cleanupOnlinePlayers();
         }
 
         // 시작 메시지 출력
@@ -78,6 +79,9 @@ public final class KnockbackScroll extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        // 온라인 플레이어에 남아있는 AttributeModifier 제거 (리로드/플러그인 제거 대비)
+        cleanupOnlinePlayers();
+
         // 1. 스케줄러 정리
         Bukkit.getScheduler().cancelTasks(this);
 
@@ -99,6 +103,30 @@ public final class KnockbackScroll extends JavaPlugin {
         instance = null;
 
         getLogger().info("넉백저항 주문서 플러그인이 비활성화되었습니다.");
+    }
+
+    /**
+     * 리로드/비정상 종료 등으로 남아있는 넉백 저항 속성을 정리합니다.
+     *
+     * 주의: Attribute 조작은 메인 스레드에서 수행되어야 합니다.
+     */
+    private void cleanupOnlinePlayers() {
+        if (!Bukkit.isPrimaryThread()) {
+            Bukkit.getScheduler().runTask(this, this::cleanupOnlinePlayers);
+            return;
+        }
+
+        if (knockbackListener == null) {
+            return;
+        }
+
+        Bukkit.getOnlinePlayers().forEach(player -> {
+            try {
+                knockbackListener.removeKnockbackResistance(player);
+            } catch (Exception e) {
+                getLogger().warning("플레이어 넉백 저항 정리 실패: " + player.getName() + " - " + e.getMessage());
+            }
+        });
     }
 
     /**

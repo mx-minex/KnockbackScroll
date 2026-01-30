@@ -45,5 +45,8 @@ run/
 *~
 nul
 
+# Local test artifacts
+test_output.txt
+
 # Claude Code 설정
 CLAUDE.md

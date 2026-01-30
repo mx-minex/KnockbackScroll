@@ -6,7 +6,6 @@ import org.bukkit.scheduler.BukkitTask;
 import kr.minex.knockbackscroll.KnockbackScroll;
 import kr.minex.knockbackscroll.utils.TimeUtils;
 
-import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,11 +51,7 @@ public class EffectManager {
         if (endTime == null) {
             return false;
         }
-        if (System.currentTimeMillis() >= endTime) {
-            activeEffects.remove(player.getUniqueId());
-            return false;
-        }
-        return true;
+        return System.currentTimeMillis() < endTime;
     }
 
     /**
@@ -86,22 +81,27 @@ public class EffectManager {
      * 1초마다 실행하여 만료된 효과 정리 및 알림
      */
     public void startExpirationChecker() {
+        if (expirationTask != null) {
+            expirationTask.cancel();
+            expirationTask = null;
+        }
+
         expirationTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             long now = System.currentTimeMillis();
 
-            Iterator<Map.Entry<UUID, Long>> iterator = activeEffects.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<UUID, Long> entry = iterator.next();
+            for (Map.Entry<UUID, Long> entry : activeEffects.entrySet()) {
+                if (now < entry.getValue()) {
+                    continue;
+                }
 
-                if (now >= entry.getValue()) {
-                    iterator.remove();
+                UUID uuid = entry.getKey();
+                activeEffects.remove(uuid, entry.getValue());
 
-                    // 효과 종료 알림 및 넉백 저항 제거
-                    Player player = Bukkit.getPlayer(entry.getKey());
-                    if (player != null && player.isOnline()) {
-                        plugin.getKnockbackListener().removeKnockbackResistance(player);
-                        plugin.getMessageManager().send(player, "effect.expired");
-                    }
+                // 효과 종료 알림 및 넉백 저항 제거
+                Player player = Bukkit.getPlayer(uuid);
+                if (player != null && player.isOnline()) {
+                    plugin.getKnockbackListener().removeKnockbackResistance(player);
+                    plugin.getMessageManager().send(player, "effect.expired");
                 }
             }
         }, 20L, 20L); // 1초마다 실행
