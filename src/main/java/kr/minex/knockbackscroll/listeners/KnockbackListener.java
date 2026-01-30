@@ -11,6 +11,8 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import kr.minex.knockbackscroll.KnockbackScroll;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -80,10 +82,15 @@ public class KnockbackListener implements Listener {
         }
 
         // 혹시 이름으로 남아있는 모디파이어도 정리
+        // ConcurrentModificationException 방지를 위해 복사본 생성 후 순회
+        List<AttributeModifier> toRemove = new ArrayList<>();
         for (AttributeModifier mod : attribute.getModifiers()) {
             if (MODIFIER_NAME.equals(mod.getName())) {
-                attribute.removeModifier(mod);
+                toRemove.add(mod);
             }
+        }
+        for (AttributeModifier mod : toRemove) {
+            attribute.removeModifier(mod);
         }
     }
 
