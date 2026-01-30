@@ -1,0 +1,42 @@
+name: KnockbackScroll
+version: '${version}'
+main: kr.minex.knockbackscroll.KnockbackScroll
+api-version: '1.20'
+authors:
+  - Minex
+description: 넉백저항 효과를 부여하는 주문서 플러그인
+
+commands:
+  넉백저항주문서:
+    description: 넉백저항 주문서 관리 명령어
+    usage: /<command> <생성|리로드> [타입]
+    permission: knockbackscroll.command
+    aliases:
+      - kbscroll
+      - 넉백주문서
+
+permissions:
+  knockbackscroll.*:
+    description: 모든 넉백저항 주문서 권한
+    default: op
+    children:
+      knockbackscroll.command: true
+      knockbackscroll.create: true
+      knockbackscroll.reload: true
+      knockbackscroll.use: true
+
+  knockbackscroll.command:
+    description: 기본 명령어 사용 권한
+    default: op
+
+  knockbackscroll.create:
+    description: 주문서 생성 권한
+    default: op
+
+  knockbackscroll.reload:
+    description: 설정 리로드 권한
+    default: op
+
+  knockbackscroll.use:
+    description: 주문서 사용 권한
+    default: true

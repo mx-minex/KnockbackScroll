@@ -1,0 +1,46 @@
+# =============================================
+# KnockbackScroll Plugin
+# Created by Junseo5
+# Bug reports: Discord - Junseo5#3213
+# =============================================
+# 넉백저항 주문서 설정 파일
+# =============================================
+
+settings:
+  # 쿨타임 (초) - 주문서 사용 후 다시 사용할 수 있을 때까지의 시간
+  cooldown: 60
+
+  # 지속시간 (초) - 넉백저항 효과가 지속되는 시간
+  duration: 10
+
+# 아이템 설정
+item:
+  # 1회용 주문서
+  single-use:
+    display-name: "&6&l[1회용] &e넉백저항 주문서"
+    lore:
+      - ""
+      - "&7우클릭으로 사용하면"
+      - "&7{duration}초 동안 넉백을 무효화합니다."
+      - ""
+      - "&c1회 사용 후 소멸됩니다."
+      - "&8쿨타임: {cooldown}초"
+
+  # 다회용 주문서 (무제한)
+  unlimited:
+    display-name: "&5&l[다회용] &d넉백저항 주문서"
+    lore:
+      - ""
+      - "&7우클릭으로 사용하면"
+      - "&7{duration}초 동안 넉백을 무효화합니다."
+      - ""
+      - "&a무제한으로 사용 가능합니다."
+      - "&8쿨타임: {cooldown}초"
+
+# 소리 설정
+sounds:
+  # 주문서 사용 시 재생되는 소리
+  activate:
+    type: BLOCK_ENCHANTMENT_TABLE_USE
+    volume: 1.0
+    pitch: 1.0
