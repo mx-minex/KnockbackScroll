@@ -12,10 +12,28 @@ repositories {
         name = "spigotmc-repo"
         url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
     }
+    // MockBukkit v1.20 pulls Paper API transitively
+    maven {
+        name = "papermc"
+        url = "https://repo.papermc.io/repository/maven-public/"
+    }
+    maven {
+        name = "jitpack"
+        url = "https://jitpack.io"
+    }
 }
 
 dependencies {
     compileOnly("org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT")
+
+    // 테스트 의존성
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+    testImplementation("org.mockito:mockito-core:5.7.0")
+    testImplementation("com.github.seeseemelk:MockBukkit-v1.20:3.9.0")
+}
+
+test {
+    useJUnitPlatform()
 }
 
 tasks {
