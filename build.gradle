@@ -53,3 +53,16 @@ processResources {
         expand props
     }
 }
+
+// JAR 파일 설정
+jar {
+    archiveBaseName.set('KnockbackScroll')
+    archiveVersion.set(version)
+
+    manifest {
+        attributes(
+            'Implementation-Title': 'KnockbackScroll',
+            'Implementation-Version': version
+        )
+    }
+}
