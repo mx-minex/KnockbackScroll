@@ -7,6 +7,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -15,6 +16,8 @@ import kr.minex.knockbackscroll.config.ConfigManager;
 import kr.minex.knockbackscroll.managers.CooldownManager;
 import kr.minex.knockbackscroll.managers.EffectManager;
 import kr.minex.knockbackscroll.managers.ScrollManager;
+
+import java.util.UUID;
 
 /**
  * 주문서 우클릭 사용 이벤트 처리 리스너
@@ -106,13 +109,42 @@ public class ScrollUseListener implements Listener {
     }
 
     /**
+     * 플레이어 접속 시 이중 안전장치
+     *
+     * 혹시 이전 세션에서 남아있는 넉백 저항 속성이 있다면 정리
+     * (비정상 종료 등의 경우를 대비)
+     */
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+
+        // 효과 데이터가 없는데 속성이 남아있다면 정리
+        if (!plugin.getEffectManager().hasActiveEffect(player)) {
+            plugin.getKnockbackListener().removeKnockbackResistance(player);
+        }
+    }
+
+    /**
      * 플레이어 퇴장 시 데이터 정리
+     *
+     * 중요: 효과가 활성화된 상태에서 퇴장하면 Bukkit Attribute가 남아있게 되므로
+     * 반드시 Player 객체가 유효한 동안 속성을 제거해야 함
+     *
+     * 엣지 케이스: 효과 만료 직후 체커가 실행되기 전에 퇴장하는 경우를 대비해
+     * 조건 없이 항상 속성 제거를 시도함 (removeKnockbackResistance는 멱등성 보장)
      */
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        java.util.UUID uuid = event.getPlayer().getUniqueId();
+        Player player = event.getPlayer();
+        UUID uuid = player.getUniqueId();
+
+        // 항상 Bukkit Attribute 제거 시도 (Player 객체가 유효한 이 시점에서)
+        // removeKnockbackResistance 내부에서 appliedModifiers도 정리됨
+        plugin.getKnockbackListener().removeKnockbackResistance(player);
+
+        // 메모리 데이터 정리 (쿨타임, 효과 데이터)
+        // 참고: KnockbackListener.cleanup()은 removeKnockbackResistance()에서 이미 처리됨
         plugin.getCooldownManager().cleanup(uuid);
         plugin.getEffectManager().cleanup(uuid);
-        plugin.getKnockbackListener().cleanup(uuid);
     }
 }
